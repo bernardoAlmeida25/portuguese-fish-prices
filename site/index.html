@@ -3,15 +3,52 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
-  <title>Preços do Peixe — Lotas Portuguesas</title>
+
+  <!-- SEO -->
+  <title>Preços de Pescado em Portugal | Histórico e Estatísticas</title>
+  <meta
+    name="description"
+    content="Consulta o histórico de preços de pescado em Portugal. Explora preços diários, compara espécies e lotas, analisa calibres e frescura e acompanha a evolução sazonal."
+  >
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Bernardo Almeida">
+  <meta name="theme-color" content="#176b55">
+  <link rel="canonical" href="https://bernardoalmeida25.github.io/portuguese-fish-prices/">
+
+  <!-- Open Graph: partilha em redes sociais e aplicações de mensagens -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_PT">
+  <meta property="og:site_name" content="Preços de Pescado em Portugal">
+  <meta property="og:title" content="Preços de Pescado em Portugal | Histórico e Estatísticas">
+  <meta
+    property="og:description"
+    content="Explora o histórico de preços de pescado, compara lotas portuguesas e acompanha a evolução dos preços por espécie, calibre e frescura."
+  >
+  <meta property="og:url" content="https://bernardoalmeida25.github.io/portuguese-fish-prices/">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Preços de Pescado em Portugal">
+  <meta
+    name="twitter:description"
+    content="Histórico de preços, gráficos interativos e comparação de preços de pescado nas lotas portuguesas."
+  >
+
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+
 </head>
 <body>
   <main>
     <header>
-      <h1>Preços do Pescado em Portugal</h1>
-      <p>Consulta e compara os preços médios da primeira venda nas lotas da Docapesca, por data, lota e espécie.</p>
+      <h1>Preços de Pescado em Portugal</h1>
+      <p>
+        Consulta o histórico de preços médios da primeira venda nas lotas
+        portuguesas da Docapesca. Compara preços por data, lota, espécie,
+        calibre e frescura, e explora tendências e variações sazonais.
+      </p>
     </header>
 
     <nav class="tabs" role="tablist" aria-label="Secções do site">
@@ -21,9 +58,9 @@
 
     <p class="load-error" id="load-error" hidden></p>
 
-    <!-- ============ Separador 1: preços e gráficos ============ -->
+    <!-- Preços e gráficos -->
     <div id="panel-diario" role="tabpanel" aria-labelledby="tab-diario">
-      <section class="filters" aria-label="Filtros">
+      <section class="filters" aria-label="Filtros de preços">
         <div>
           <label for="day">Data</label>
           <select id="day"><option value="">A carregar datas…</option></select>
@@ -44,7 +81,7 @@
 
       <p class="coverage" id="coverage" role="status"></p>
 
-      <section class="stats" aria-label="Resumo">
+      <section class="stats" aria-label="Resumo dos preços">
         <article class="stat">
           <span class="stat-label">Preço mediano</span>
           <strong class="stat-value" id="avg">—</strong>
@@ -67,25 +104,28 @@
         </article>
       </section>
 
-      <section class="charts">
+      <section class="charts" aria-label="Análise e comparação de preços">
         <article class="panel">
           <h2>10 produtos mais caros</h2>
           <p class="note">Um produto é uma espécie com um calibre (T) e uma frescura (E, A ou B). Mostra a mediana entre as lotas.</p>
           <div class="chart-wrap"><canvas id="topChart" role="img" aria-label="Os 10 produtos com preço mais alto"></canvas></div>
           <p class="chart-msg" id="topMsg" hidden></p>
         </article>
+
         <article class="panel">
           <h2>Que lotas vendem mais caro ou mais barato?</h2>
-          <p class="note">Diferença face ao preço mediano de cada produto, só para produtos vendidos em 2 ou mais lotas. Ignora o filtro de lota.</p>
+          <p class="note">Diferença face ao preço mediano de cada produto, só para produtos vendidos em duas ou mais lotas. Ignora o filtro de lota.</p>
           <div class="chart-wrap"><canvas id="lotaChart" role="img" aria-label="Diferença de preço de cada lota face à mediana"></canvas></div>
           <p class="chart-msg" id="lotaMsg" hidden></p>
         </article>
+
         <article class="panel">
           <h2>Quanto vale a frescura?</h2>
           <p class="note">Preço de cada frescura face à categoria A, na mesma lota, espécie e calibre.</p>
           <div class="chart-wrap short"><canvas id="freshChart" role="img" aria-label="Diferença de preço entre frescuras E, A e B"></canvas></div>
           <p class="chart-msg" id="freshMsg" hidden></p>
         </article>
+
         <article class="panel">
           <h2>Quanto vale o calibre?</h2>
           <p class="note">Preço de cada calibre face ao T1, na mesma lota, espécie e frescura.</p>
@@ -105,15 +145,24 @@
           <h2 style="margin:0">Registos de preços</h2>
           <span class="pill" id="datePill">A carregar…</span>
         </div>
+
         <div class="table-scroll">
           <table>
             <thead>
-              <tr><th>Lota</th><th>Espécie</th><th>Calibre</th><th>Frescura</th><th>Preço médio</th></tr>
+              <tr>
+                <th>Lota</th>
+                <th>Espécie</th>
+                <th>Calibre</th>
+                <th>Frescura</th>
+                <th>Preço médio</th>
+              </tr>
             </thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
+
         <div id="empty" hidden>Não foram encontrados registos para os filtros selecionados.</div>
+
         <div class="pagination" aria-label="Paginação da tabela">
           <label for="pageSize">Registos por página</label>
           <select id="pageSize">
@@ -126,30 +175,80 @@
           <span id="pageInfo">Página 1 de 1</span>
           <button id="nextPage" type="button" disabled>Seguinte</button>
         </div>
+
         <p id="status" role="status">A carregar os dados…</p>
       </section>
     </div>
 
-    <!-- ============ Separador 2: Santos Populares ============ -->
+    <!-- Santos Populares -->
     <section id="panel-sazonalidade" role="tabpanel" aria-labelledby="tab-sazonalidade" hidden>
-      <p class="seasonal-intro">Compara os preços nos 30 dias anteriores e nos 15 dias posteriores a Santo António, São João ou São Pedro. São usados apenas registos reais; dias sem recolha não são estimados.</p>
+      <h2>Análise sazonal dos preços durante os Santos Populares</h2>
+      <p class="seasonal-intro">
+        Compara os preços nos 30 dias anteriores e nos 15 dias posteriores
+        a Santo António, São João ou São Pedro. São usados apenas registos
+        reais; dias sem recolha não são estimados.
+      </p>
+
       <section class="filters seasonal-filters" aria-label="Filtros de sazonalidade">
-        <div><label for="santos-festa">Festa</label><select id="santos-festa"><option value="santo-antonio">Santo António · 13 jun</option><option value="sao-joao">São João · 24 jun</option><option value="sao-pedro">São Pedro · 29 jun</option></select></div>
-        <div><label for="santos-ano">Ano</label><select id="santos-ano"></select></div>
-        <div><label for="santos-especie">Espécie</label><select id="santos-especie"></select></div>
-        <div><label for="santos-produto">Produto</label><select id="santos-produto"></select></div>
-        <div><label for="santos-lota">Lota</label><select id="santos-lota"></select></div>
+        <div>
+          <label for="santos-festa">Festa</label>
+          <select id="santos-festa">
+            <option value="santo-antonio">Santo António · 13 jun</option>
+            <option value="sao-joao">São João · 24 jun</option>
+            <option value="sao-pedro">São Pedro · 29 jun</option>
+          </select>
+        </div>
+        <div>
+          <label for="santos-ano">Ano</label>
+          <select id="santos-ano"></select>
+        </div>
+        <div>
+          <label for="santos-especie">Espécie</label>
+          <select id="santos-especie"></select>
+        </div>
+        <div>
+          <label for="santos-produto">Produto</label>
+          <select id="santos-produto"></select>
+        </div>
+        <div>
+          <label for="santos-lota">Lota</label>
+          <select id="santos-lota"></select>
+        </div>
       </section>
+
       <section class="stats seasonal-stats" aria-label="Resumo da festa">
-        <article class="stat"><span class="stat-label">Antes · -30 a -8 dias</span><strong class="stat-value" id="santos-antes">—</strong><span class="stat-detail" id="santos-antes-detalhe">&nbsp;</span></article>
-        <article class="stat"><span class="stat-label">Em torno · -7 a +7 dias</span><strong class="stat-value" id="santos-durante">—</strong><span class="stat-detail" id="santos-durante-detalhe">&nbsp;</span></article>
-        <article class="stat"><span class="stat-label">Variação entre períodos</span><strong class="stat-value" id="santos-variacao">—</strong><span class="stat-detail" id="santos-variacao-detalhe">Dados insuficientes para comparar</span></article>
-        <article class="stat"><span class="stat-label">Registos no período</span><strong class="stat-value" id="santos-registos">—</strong><span class="stat-detail" id="santos-registos-detalhe">&nbsp;</span></article>
+        <article class="stat">
+          <span class="stat-label">Antes · -30 a -8 dias</span>
+          <strong class="stat-value" id="santos-antes">—</strong>
+          <span class="stat-detail" id="santos-antes-detalhe">&nbsp;</span>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Em torno · -7 a +7 dias</span>
+          <strong class="stat-value" id="santos-durante">—</strong>
+          <span class="stat-detail" id="santos-durante-detalhe">&nbsp;</span>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Variação entre períodos</span>
+          <strong class="stat-value" id="santos-variacao">—</strong>
+          <span class="stat-detail" id="santos-variacao-detalhe">Dados insuficientes para comparar</span>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Registos no período</span>
+          <strong class="stat-value" id="santos-registos">—</strong>
+          <span class="stat-detail" id="santos-registos-detalhe">&nbsp;</span>
+        </article>
       </section>
+
       <section class="panel seasonal-panel">
         <h2>Evolução do preço médio em torno da festa</h2>
-        <p>O dia 0 é o dia da festa. Dias sem recolha ficam sem valor — não são tratados como preços de zero euros. Para evitar efeitos de mistura de calibres, escolhe um produto concreto.</p>
-        <div class="chart-wrap seasonal-chart-wrap" id="santos-wrap"><canvas id="santos-chart" role="img" aria-label="Preço médio por dia em torno da festa"></canvas></div>
+        <p>
+          O dia 0 é o dia da festa. Dias sem recolha ficam sem valor — não
+          são tratados como preços de zero euros. Para evitar efeitos de
+          mistura de calibres, escolhe um produto concreto.
+        </p>
+        <div class="chart-wrap seasonal-chart-wrap" id="santos-wrap">
+          <canvas id="santos-chart" role="img" aria-label="Preço médio por dia em torno da festa"></canvas>
+        </div>
         <p class="empty-state" id="santos-vazio" hidden></p>
         <p id="santos-mensagem" role="status">A carregar dados…</p>
       </section>
@@ -157,8 +256,26 @@
   </main>
 
   <footer>
-    <p>Fonte: <a href="https://www.docapesca.pt/pt/estatisticas" target="_blank" rel="noopener">Docapesca — Estatísticas diárias</a>. Preços médios em euros, tal como publicados; a Docapesca não indica a unidade na tabela (provavelmente €/kg).</p>
-    <p>As letras E, A e B correspondem ao campo de frescura dos dados (1, 2 e 3) e coincidem em todos os registos com a letra do nome do produto. O calibre T vem do próprio nome (T1, T2, …). Nos dias em que só algumas lotas foram recolhidas, as comparações entre lotas usam só as que têm dados.</p>
+    <section aria-label="Fonte e metodologia">
+      <h2>Fonte dos dados e metodologia</h2>
+      <p>
+        Fonte: <a href="https://www.docapesca.pt/pt/estatisticas" target="_blank" rel="noopener noreferrer">Docapesca — Estatísticas diárias</a>.
+        Os valores representam preços médios em euros, tal como publicados.
+        A tabela de origem não indica explicitamente a unidade dos preços;
+        por isso, não se assume que correspondam a euros por quilograma.
+      </p>
+      <p>
+        As letras E, A e B correspondem ao campo de frescura dos dados (1, 2 e 3)
+        e coincidem em todos os registos com a letra do nome do produto.
+        O calibre T vem do próprio nome (T1, T2, …). Nos dias em que só algumas
+        lotas foram recolhidas, as comparações entre lotas usam apenas as que
+        têm dados disponíveis.
+      </p>
+      <p>
+        Os gráficos e as comparações dependem dos registos disponíveis para
+        cada data e filtro. Dias sem dados não são estimados.
+      </p>
+    </section>
     <p id="generated"></p>
   </footer>
 
