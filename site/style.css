@@ -50,3 +50,16 @@ footer a { color:var(--green); }
 @media(max-width:800px){ .seasonal-stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:480px){ .seasonal-stats { grid-template-columns:1fr 1fr; } .seasonal-chart-wrap { height:300px; } }
 
+
+/* ---------- acrescentos ---------- */
+.note { margin: -8px 0 12px; font-size: .85rem; color: var(--muted); }
+.chart-wrap.short { height: 250px; }
+.chart-wrap[hidden], .chart-wrap.is-hidden { display: none; }
+.chart-msg { margin: 8px 0 0; padding: 12px 14px; border-radius: 10px; background: #f3f7f5; color: var(--muted); font-size: .88rem; }
+.coverage { margin: -4px 0 16px; padding: 10px 14px; border-radius: 10px; background: #fff8e8; border: 1px solid #f0e0b5; color: #6b5413; font-size: .88rem; }
+.coverage:empty { display: none; }
+.load-error { margin: 0 0 16px; padding: 12px 14px; border-radius: 10px; background: #fdeceb; border: 1px solid #f1c3bf; color: #8a2a22; }
+.trend-panel { margin-bottom: 18px; }
+.empty-state { padding: 28px 16px; text-align: center; border: 1px dashed var(--line); border-radius: 10px; background: #fbfdfc; }
+footer p { margin: 0 0 6px; color: var(--muted); font-size: 12px; }
+@media (min-width: 801px) { .seasonal-filters { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
