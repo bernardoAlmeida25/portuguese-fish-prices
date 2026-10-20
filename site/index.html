@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preços do Peixe — Lotas Portuguesas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Preços do Pescado em Portugal</h1>
+      <p>Consulta e compara os preços médios registados nas lotas, por data e espécie.</p>
+    </header>
+
+
+    <nav class="tabs" role="tablist" aria-label="Secções do site">
+      <button class="tab-button" id="tab-diario" role="tab" aria-selected="true" aria-controls="panel-diario" type="button">Preços e gráficos</button>
+      <button class="tab-button" id="tab-sazonalidade" role="tab" aria-selected="false" aria-controls="panel-sazonalidade" type="button">Santos Populares</button>
+    </nav>
+    <div id="panel-diario" role="tabpanel" aria-labelledby="tab-diario">
+    <section class="filters" aria-label="Filtros">
+      <div>
+        <label for="day">Data</label>
+        <select id="day"><option value="">A carregar datas…</option></select>
+      </div>
+      <div>
+        <label for="market">Lota</label>
+        <select id="market"><option value="">A carregar lotas…</option></select>
+      </div>
+      <div>
+        <label for="species">Espécie</label>
+        <select id="species"><option value="">A carregar espécies…</option></select>
+      </div>
+      <div>
+        <label for="search">Pesquisar</label>
+        <input id="search" type="search" placeholder="Nome, espécie, lota ou calibre">
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Resumo">
+      <article class="stat">
+        <span class="stat-label">Preço médio</span>
+        <strong class="stat-value" id="avg">—</strong>
+        <span class="stat-detail">Dos registos filtrados</span>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Registos</span>
+        <strong class="stat-value" id="count">—</strong>
+        <span class="stat-detail">Após aplicar os filtros</span>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Preço mais alto</span>
+        <strong class="stat-value" id="max">—</strong>
+        <span class="stat-detail" id="maxName">—</span>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Lotas</span>
+        <strong class="stat-value" id="marketsCount">—</strong>
+        <span class="stat-detail">Com registos nos filtros atuais</span>
+      </article>
+    </section>
+
+    <section class="charts">
+      <article class="panel">
+        <h2>10 espécies com maior preço médio</h2>
+        <div class="chart-wrap"><canvas id="speciesChart"></canvas></div>
+      </article>
+      <article class="panel">
+        <h2>Preço médio por lota</h2>
+        <div class="chart-wrap"><canvas id="marketChart"></canvas></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="table-top">
+        <h2 style="margin:0">Registos de preços</h2>
+        <span class="pill" id="datePill">A carregar…</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Lota</th><th>Espécie</th><th>Calibre</th><th>Nome</th><th>Preço médio</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div id="empty" hidden>Não foram encontrados registos para os filtros selecionados.</div>
+      <div class="pagination" aria-label="Paginação da tabela">
+        <label for="pageSize">Registos por página</label>
+        <select id="pageSize">
+          <option value="10" selected>10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <button id="prevPage" type="button" disabled>Anterior</button>
+        <span id="pageInfo">Página 1 de 1</span>
+        <button id="nextPage" type="button" disabled>Seguinte</button>
+      </div>
+      <p id="status" role="status">A carregar os dados…</p>
+    </section>
+    </div>
+    <section id="panel-sazonalidade" role="tabpanel" aria-labelledby="tab-sazonalidade" hidden>
+      <p class="seasonal-intro">Compara os preços nos 30 dias anteriores e nos 15 dias posteriores a Santo António, São João ou São Pedro. São usados apenas registos reais existentes no JSON.</p>
+      <section class="filters seasonal-filters" aria-label="Filtros de sazonalidade">
+        <div><label for="santos-festa">Festa</label><select id="santos-festa"><option value="santo-antonio">Santo António · 13 de junho</option><option value="sao-joao">São João · 24 de junho</option><option value="sao-pedro">São Pedro · 29 de junho</option></select></div>
+        <div><label for="santos-ano">Ano</label><select id="santos-ano"></select></div>
+        <div><label for="santos-especie">Espécie</label><select id="santos-especie"></select></div>
+        <div><label for="santos-lota">Lota</label><select id="santos-lota"></select></div>
+      </section>
+      <section class="stats seasonal-stats" aria-label="Resumo da festa">
+        <article class="stat"><span class="stat-label">Antes · -30 a -8 dias</span><strong class="stat-value" id="santos-antes">—</strong></article>
+        <article class="stat"><span class="stat-label">Em torno · -7 a +7 dias</span><strong class="stat-value" id="santos-durante">—</strong></article>
+        <article class="stat"><span class="stat-label">Variação entre períodos</span><strong class="stat-value" id="santos-variacao">—</strong><span class="stat-detail" id="santos-variacao-detalhe">Dados insuficientes para comparar</span></article>
+        <article class="stat"><span class="stat-label">Registos no período</span><strong class="stat-value" id="santos-registos">—</strong></article>
+      </section>
+      <section class="panel seasonal-panel"><h2>Evolução do preço médio em torno da festa</h2><p>O dia 0 é o dia da festa. Dias sem recolha ficam sem valor — não são tratados como preços de zero euros.</p><div class="chart-wrap seasonal-chart-wrap"><canvas id="santos-chart"></canvas></div><p id="santos-mensagem" role="status">A carregar dados…</p></section>
+    </section>
+  </main>
+  <footer>Fonte: <a href="https://www.docapesca.pt/pt/estatisticas" target="_blank" rel="noopener">Docapesca — Estatísticas diárias</a></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
