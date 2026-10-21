@@ -3,11 +3,10 @@ name: Publicar site
 on:
   push:
     branches: [main]
-    paths:
-      - "site/**"
-      - ".github/workflows/collect-prices.yml"
-      - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Recolher preços do pescado"]
+    types: [completed]
 
 permissions:
   contents: read
