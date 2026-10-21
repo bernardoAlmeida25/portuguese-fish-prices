@@ -5,12 +5,8 @@ on:
     branches: [main]
     paths:
       - "site/**"
-      - "data/fish_prices.json"
-      - ".github/workflows/deploy-pages.yml"
       - ".github/workflows/collect-prices.yml"
-  workflow_run:
-    workflows: ["Recolher preços do pescado"]
-    types: [completed]
+      - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
 permissions:

@@ -2,7 +2,7 @@ name: Recolher preços do pescado
 
 on:
   schedule:
-    # 20:00 e 21:00 UTC; o job só recolhe quando são 21h em Europe/Lisbon.
+    # Verão: 20:00 UTC = 21h em Lisboa · Inverno: 21:00 UTC = 21h em Lisboa
     - cron: "0 20 * * *"
     - cron: "0 21 * * *"
   workflow_dispatch:
@@ -17,39 +17,27 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Obter repositório
-        uses: actions/checkout@v4
-
-      - name: Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Instalar dependências
-        run: python -m pip install requests beautifulsoup4
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
 
       - name: Verificar hora de Portugal
         id: localtime
+        run: echo "hour=$(TZ=Europe/Lisbon date +%H)" >> "$GITHUB_OUTPUT"
+
+      - name: Recolher e gerar dados
+        if: steps.localtime.outputs.hour == '21' || github.event_name == 'workflow_dispatch'
         run: |
-          HOUR="$(TZ=Europe/Lisbon date +%H)"
-          echo "hour=$HOUR" >> "$GITHUB_OUTPUT"
-          echo "Hora local em Lisboa: $(TZ=Europe/Lisbon date '+%Y-%m-%d %H:%M:%S %Z')"
+          uv run fish_prices.py
+          uv run build_json.py
 
-      - name: Recolher dados
-        if: steps.localtime.outputs.hour == '21' || github.event_name == 'workflow_dispatch'
-        run: python fish_prices.py
-
-      - name: Gerar JSON para o site
-        if: steps.localtime.outputs.hour == '21' || github.event_name == 'workflow_dispatch'
-        run: python build_json.py
-
-      - name: Guardar histórico e JSON
+      - name: Guardar histórico e dados do site
         if: steps.localtime.outputs.hour == '21' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/fish_prices.csv data/fish_prices.json
+          git add data/fish_prices.csv site/data
           if git diff --cached --quiet; then
             echo "Não existem alterações para guardar."
           else
