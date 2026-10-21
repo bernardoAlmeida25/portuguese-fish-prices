@@ -36,11 +36,26 @@ let currentPage = 1, pageSize = 10, renderToken = 0;
 
 /* ---------------------------------------------------------------- dados */
 
+
 async function getJSON(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  // Usa uma versão associada à última geração dos dados.
+  // Para o manifest, cria uma chave nova em cada carregamento.
+  const version = manifest?.generated_at ?? Date.now();
+  const separator = url.includes("?") ? "&" : "?";
+  const urlVersioned =
+    `${url}${separator}v=${encodeURIComponent(version)}`;
+
+  const response = await fetch(urlVersioned, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(`${url}: HTTP ${response.status}`);
+  }
+
   return response.json();
 }
+
 
 /** Devolve Map(dia -> linhas [dia, lota, produto, preço]) do mês; guarda em cache. */
 function loadMonth(ym) {

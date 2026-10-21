@@ -2,9 +2,11 @@ name: Recolher preços do pescado
 
 on:
   schedule:
-    # Verão: 20:00 UTC = 21h em Lisboa · Inverno: 21:00 UTC = 21h em Lisboa
-    - cron: "0 20 * * *"
-    - cron: "0 21 * * *"
+    # Minutos "estranhos" (:23) para fugir ao pico de carga do GitHub às horas redondas.
+    # Três disparos como redundância, porque o GitHub pode atrasar ou saltar execuções.
+    - cron: "23 20 * * *"
+    - cron: "23 21 * * *"
+    - cron: "23 22 * * *"
   workflow_dispatch:
 
 permissions:
@@ -22,18 +24,27 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
 
-      - name: Verificar hora de Portugal
-        id: localtime
-        run: echo "hour=$(TZ=Europe/Lisbon date +%H)" >> "$GITHUB_OUTPUT"
+      - name: Verificar se é altura de recolher
+        id: gate
+        run: |
+          hour=$(TZ=Europe/Lisbon date +%-H)
+          echo "Hora em Lisboa: $hour"
+          # Lotas fecham às 20h; aceitamos qualquer hora entre as 21h e as 23h
+          # de Lisboa, para tolerar atrasos do agendador.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || { [ "$hour" -ge 21 ] && [ "$hour" -le 23 ]; }; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Recolher e gerar dados
-        if: steps.localtime.outputs.hour == '21' || github.event_name == 'workflow_dispatch'
+        if: steps.gate.outputs.run == 'true'
         run: |
           uv run fish_prices.py
           uv run build_json.py
 
       - name: Guardar histórico e dados do site
-        if: steps.localtime.outputs.hour == '21' || github.event_name == 'workflow_dispatch'
+        if: steps.gate.outputs.run == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -42,5 +53,6 @@ jobs:
             echo "Não existem alterações para guardar."
           else
             git commit -m "data: atualizar preços do pescado"
+            git pull --rebase
             git push
           fi
