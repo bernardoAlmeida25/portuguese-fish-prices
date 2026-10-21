@@ -8,9 +8,11 @@ const GREEN = "#2b8068", ORANGE = "#d9822b", GREY = "#9fb3ab";
 const LINE_COLORS = ["#2b8068", "#2f6fb0", "#d9822b", "#8a5db8", "#c0494a", "#6b7f78"];
 
 const $ = id => document.getElementById(id);
-const money = n => new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(n);
+const t = (...args) => I18N.t(...args);
+const tp = (...args) => I18N.tp(...args);
+const money = n => new Intl.NumberFormat(I18N.locale, { style: "currency", currency: "EUR" }).format(n);
 const pct = (x, d = 0) => (x > 0 ? "+" : "") +
-  (x * 100).toLocaleString("pt-PT", { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
+  (x * 100).toLocaleString(I18N.locale, { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
 const plain = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const mean = a => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : null);
 const median = a => {
@@ -25,7 +27,7 @@ const groupBy = (arr, keyFn) => {
 };
 const shortDate = iso => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 const longDate = iso => new Date(iso + "T12:00:00")
-  .toLocaleDateString("pt-PT", { day: "numeric", month: "long", year: "numeric" });
+  .toLocaleDateString(I18N.locale, { day: "numeric", month: "long", year: "numeric" });
 
 let manifest, lotaNames, itemInfo, speciesList;
 const monthCache = new Map();
@@ -59,9 +61,11 @@ function rowObj(r) {
            especie: it.especie, label: it.label, hay: it.hay + " " + plain(lotaNames[r[1]]) };
 }
 
-function showError(message) {
+let lastError = null;
+function showError(key, params = {}) {
+  lastError = [key, params];
   const el = $("load-error");
-  el.textContent = message;
+  el.textContent = t(key, params);
   el.hidden = false;
 }
 
@@ -110,7 +114,7 @@ function drawTop(rows) {
              n: new Set(rs.map(r => r.l)).size };
   }).sort((a, b) => b.med - a.med).slice(0, 10);
 
-  if (!list.length) return chartMessage("top", "topChart", "topMsg", "Sem registos para os filtros escolhidos.");
+  if (!list.length) return chartMessage("top", "topChart", "topMsg", t("top.empty"));
   chartMessage("top", "topChart", "topMsg", null);
   makeChart("top", "topChart", {
     type: "bar",
@@ -120,7 +124,7 @@ function drawTop(rows) {
       indexAxis: "y", responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => {
         const x = list[c.dataIndex];
-        return " " + money(x.med) + (x.n > 1 ? ` · ${x.n} lotas (${money(x.min)} a ${money(x.max)})` : "");
+        return " " + money(x.med) + (x.n > 1 ? t("top.tip", { n: x.n, min: money(x.min), max: money(x.max) }) : "");
       } } } },
       scales: { x: { beginAtZero: true, ticks: { callback: v => money(v) } },
                 y: { grid: { display: false }, ticks: { autoSkip: false } } }
@@ -141,8 +145,7 @@ function drawLotas(base, selectedLota) {
     .sort((a, b) => a.v - b.v);
 
   if (list.length < 2) {
-    return chartMessage("lota", "lotaChart", "lotaMsg",
-      "Para comparar lotas são precisos pelo menos 2 lotas com 5 ou mais produtos em comum neste dia.");
+    return chartMessage("lota", "lotaChart", "lotaMsg", t("lota.msg"));
   }
   chartMessage("lota", "lotaChart", "lotaMsg", null);
   makeChart("lota", "lotaChart", {
@@ -156,9 +159,9 @@ function drawLotas(base, selectedLota) {
       indexAxis: "y", responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => {
         const x = list[c.dataIndex];
-        return ` ${pct(x.v, 1)} face à mediana · ${x.n} produtos comparados`;
+        return t("lota.tip", { pct: pct(x.v, 1), n: x.n });
       } } } },
-      scales: { x: { ...percentAxis, title: { display: true, text: "← mais barata · mais cara →" } },
+      scales: { x: { ...percentAxis, title: { display: true, text: t("lota.axis") } },
                 y: { grid: { display: false }, ticks: { autoSkip: false } } }
     }
   });
@@ -174,20 +177,19 @@ function drawFreshness(rows) {
   });
   const MIN = 3;
   if (e.length < MIN && b.length < MIN) {
-    return chartMessage("fresh", "freshChart", "freshMsg",
-      "Há poucos produtos com várias frescuras na mesma lota para comparar (mínimo: 3 pares).");
+    return chartMessage("fresh", "freshChart", "freshMsg", t("fresh.msg"));
   }
   chartMessage("fresh", "freshChart", "freshMsg", null);
   const values = [e.length >= MIN ? median(e) : null, 0, b.length >= MIN ? median(b) : null];
   const counts = [e.length, null, b.length];
   makeChart("fresh", "freshChart", {
     type: "bar",
-    data: { labels: ["Extra (E)", "A (referência)", "B"],
+    data: { labels: ["Extra (E)", t("fresh.a"), "B"],
             datasets: [{ data: values, backgroundColor: [GREEN, GREY, ORANGE], borderRadius: 5, maxBarThickness: 60 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c =>
-        c.dataIndex === 1 ? " Referência" : ` ${pct(c.raw, 1)} face ao A · ${counts[c.dataIndex]} pares` } } },
+        c.dataIndex === 1 ? " " + t("reference") : t("fresh.tip", { pct: pct(c.raw, 1), n: counts[c.dataIndex] }) } } },
       scales: { y: percentAxis, x: { grid: { display: false } } }
     }
   });
@@ -198,23 +200,22 @@ function drawSizes(rows) {
   groupBy(rows.filter(r => r.t > 0), r => `${r.l}|${r.esp}|${r.f}`).forEach(rs => {
     const byT = new Map(rs.map(r => [r.t, r.p])), base = byT.get(1);
     if (!(base > 0)) return;
-    Object.keys(ratios).forEach(t => { if (byT.has(+t)) ratios[t].push(byT.get(+t) / base - 1); });
+    Object.keys(ratios).forEach(k => { if (byT.has(+k)) ratios[k].push(byT.get(+k) / base - 1); });
   });
-  const MIN = 3, ts = Object.keys(ratios).filter(t => ratios[t].length >= MIN);
+  const MIN = 3, ts = Object.keys(ratios).filter(k => ratios[k].length >= MIN);
   if (!ts.length) {
-    return chartMessage("size", "sizeChart", "sizeMsg",
-      "Há poucos produtos com vários calibres na mesma lota para comparar (mínimo: 3 pares por calibre).");
+    return chartMessage("size", "sizeChart", "sizeMsg", t("size.msg"));
   }
   chartMessage("size", "sizeChart", "sizeMsg", null);
   makeChart("size", "sizeChart", {
     type: "bar",
-    data: { labels: ["T1 (ref.)", ...ts.map(t => "T" + t)],
-            datasets: [{ data: [0, ...ts.map(t => median(ratios[t]))], backgroundColor: [GREY, ...ts.map(() => GREEN)],
+    data: { labels: [t("size.ref"), ...ts.map(n => "T" + n)],
+            datasets: [{ data: [0, ...ts.map(k => median(ratios[k]))], backgroundColor: [GREY, ...ts.map(() => GREEN)],
                          borderRadius: 5, maxBarThickness: 48 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c =>
-        c.dataIndex === 0 ? " Referência" : ` ${pct(c.raw, 1)} face ao T1 · ${ratios[ts[c.dataIndex - 1]].length} pares` } } },
+        c.dataIndex === 0 ? " " + t("reference") : t("size.tip", { pct: pct(c.raw, 1), n: ratios[ts[c.dataIndex - 1]].length }) } } },
       scales: { y: percentAxis, x: { grid: { display: false } } }
     }
   });
@@ -223,11 +224,11 @@ function drawSizes(rows) {
 async function drawTrend(esp, lota, token) {
   const note = $("trendNote"), wrap = $("trendWrap");
   const hide = text => { wrap.hidden = true; note.textContent = text; if (charts.trend) { charts.trend.destroy(); delete charts.trend; } };
-  if (!esp) return hide("Escolhe uma espécie nos filtros para ver como mudaram os preços dos seus produtos nos últimos 90 dias.");
+  if (!esp) return hide(t("trend.pick"));
 
   let maps;
   try { maps = await Promise.all(manifest.months.slice(-3).map(loadMonth)); }
-  catch (err) { return hide("Não foi possível carregar o histórico (" + err.message + ")."); }
+  catch (err) { return hide(t("trend.err", { msg: err.message })); }
   if (token !== renderToken) return;
 
   const latest = manifest.days[manifest.days.length - 1].d;
@@ -250,12 +251,12 @@ async function drawTrend(esp, lota, token) {
   const name = manifest.species[esp] || esp;
 
   if (days.length < 2 || !series.length) {
-    return hide(`Ainda não há dias suficientes para mostrar a evolução de ${name}: são precisos pelo menos 2 dias com o mesmo produto` +
-                (lota !== "" ? " nesta lota." : "."));
+    return hide(t(lota !== "" ? "trend.nodata.market" : "trend.nodata", { name }));
   }
   wrap.hidden = false;
-  note.textContent = `Preço dos produtos de ${name} nos últimos 90 dias com dados` +
-    (lota !== "" ? ` na lota ${lotaNames[+lota]}.` : ": mediana entre as lotas com dados em cada dia. Se o número de lotas variar, escolhe uma lota para evitar saltos.");
+  note.textContent = lota !== ""
+    ? t("trend.note.market", { name, market: lotaNames[+lota] })
+    : t("trend.note.all", { name });
   makeChart("trend", "trendChart", {
     type: "line",
     data: { labels: days.map(shortDate),
@@ -264,7 +265,7 @@ async function drawTrend(esp, lota, token) {
               borderColor: LINE_COLORS[k], backgroundColor: LINE_COLORS[k], borderWidth: 2, pointRadius: 3, tension: .2, spanGaps: true })) },
     options: {
       responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
-      plugins: { legend: { position: "bottom" }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw == null ? "sem registo" : money(c.raw)}` } } },
+      plugins: { legend: { position: "bottom" }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw == null ? t("no.record") : money(c.raw)}` } } },
       scales: { y: { beginAtZero: false, ticks: { callback: v => money(v) } }, x: { grid: { display: false } } }
     }
   });
@@ -280,7 +281,7 @@ async function renderMain() {
   if (!day) return;
   let byDay;
   try { byDay = await loadMonth(day.slice(0, 7)); }
-  catch (err) { return showError("Não foi possível carregar os dados de " + day + " (" + err.message + ")."); }
+  catch (err) { return showError("err.day", { day, msg: err.message }); }
   if (token !== renderToken) return;
 
   const lota = $("market").value, esp = $("species").value, q = plain($("search").value.trim());
@@ -290,13 +291,13 @@ async function renderMain() {
 
   const info = manifest.days.find(d => d.d === day);
   $("coverage").textContent = info && info.lotas < manifest.lotas.length
-    ? `Neste dia só há dados de ${info.lotas} das ${manifest.lotas.length} lotas; as comparações entre lotas usam apenas essas.` : "";
+    ? t("coverage", { n: info.lotas, total: manifest.lotas.length }) : "";
 
   // Resumo
   const top = rows.reduce((best, r) => (!best || r.p > best.p ? r : best), null);
   $("avg").textContent = rows.length ? money(median(rows.map(r => r.p))) : "—";
-  $("count").textContent = rows.length.toLocaleString("pt-PT");
-  $("countDetail").textContent = `${new Set(rows.map(r => r.esp)).size} espécies · ${new Set(rows.map(r => r.i)).size} produtos`;
+  $("count").textContent = rows.length.toLocaleString(I18N.locale);
+  $("countDetail").textContent = t("count.detail", { s: new Set(rows.map(r => r.esp)).size, p: new Set(rows.map(r => r.i)).size });
   $("max").textContent = top ? money(top.p) : "—";
   $("maxName").textContent = top ? `${top.label} · ${top.lota}` : "—";
   $("marketsCount").textContent = new Set(rows.map(r => r.l)).size;
@@ -326,9 +327,9 @@ async function renderMain() {
   });
   $("empty").hidden = rows.length !== 0;
   $("status").textContent = rows.length
-    ? `A mostrar ${start + 1}–${Math.min(start + pageSize, rows.length)} de ${rows.length} registos.`
-    : "Não foram encontrados registos.";
-  $("pageInfo").textContent = `Página ${currentPage} de ${totalPages}`;
+    ? t("status.range", { a: start + 1, b: Math.min(start + pageSize, rows.length), n: rows.length })
+    : t("status.none");
+  $("pageInfo").textContent = t("page.info", { p: currentPage, n: totalPages });
   $("prevPage").disabled = currentPage === 1;
   $("nextPage").disabled = currentPage === totalPages;
 }
@@ -358,13 +359,13 @@ function santosDaysWithData(year, festaKey) {
   return manifest.days.map(d => d.d).filter(d => { const x = dateOf(d); return x >= start && x <= end; });
 }
 
-function fillSantosProducts() {
+function fillSantosProducts(reset = true) {
   const esp = $("santos-especie").value;
   const options = esp
     ? itemInfo.map((it, i) => [i, it]).filter(([, it]) => it.esp === esp).map(([i, it]) => [String(i), it.label])
     : [];
-  fillSelect("santos-produto", options, esp ? "Todos os produtos (média)" : "Escolhe uma espécie");
-  $("santos-produto").value = "";
+  fillSelect("santos-produto", options, esp ? t("santos.all.products") : t("santos.pick.species"));
+  if (reset) $("santos-produto").value = "";
 }
 
 function initSantos() {
@@ -378,11 +379,11 @@ function initSantos() {
   const best = years.map(y => [y, santosDaysWithData(+y, festaKey).length]).sort((a, b) => b[1] - a[1])[0];
   $("santos-ano").value = best && best[1] > 0 ? best[0] : String(upcoming);
 
-  fillSelect("santos-especie", speciesList, "Todas as espécies");
+  fillSelect("santos-especie", speciesList, t("all.species"));
   const sardine = speciesList.find(([, name]) => /sardinh/i.test(name));
   if (sardine) $("santos-especie").value = sardine[0];
   fillSantosProducts();
-  fillSelect("santos-lota", manifest.lotas.map((l, i) => [String(i), l.n]), "Todas as lotas");
+  fillSelect("santos-lota", manifest.lotas.map((l, i) => [String(i), l.n]), t("all.markets"));
   santosReady = true;
 }
 
@@ -401,17 +402,16 @@ async function renderSantos() {
     $("santos-wrap").hidden = true;
     $("santos-vazio").hidden = false; $("santos-vazio").textContent = text;
     setKpi("santos-antes", "—", "\u00a0"); setKpi("santos-durante", "—", "\u00a0");
-    setKpi("santos-variacao", "—", "Dados insuficientes para comparar"); setKpi("santos-registos", "0", `0 de ${span} dias`);
+    setKpi("santos-variacao", "—", t("santos.insufficient")); setKpi("santos-registos", "0", t("santos.days.zero", { span }));
     $("santos-mensagem").textContent = "";
   };
 
   if (!dayList.length) {
-    return noData(`Ainda não há dados para esta janela (${longDate(isoOf(start))} a ${longDate(isoOf(end))}). ` +
-                  `A recolha começou a ${longDate(manifest.days[0].d)}.`);
+    return noData(t("santos.nodata", { from: longDate(isoOf(start)), to: longDate(isoOf(end)), start: longDate(manifest.days[0].d) }));
   }
   let maps;
   try { maps = await Promise.all([...new Set(dayList.map(d => d.slice(0, 7)))].map(loadMonth)); }
-  catch (err) { return showError("Não foi possível carregar os dados da janela (" + err.message + ")."); }
+  catch (err) { return showError("err.window", { msg: err.message }); }
   if (token !== santosToken) return;
 
   const daily = new Map(); let records = 0;
@@ -421,44 +421,43 @@ async function renderSantos() {
                                   (lota === "" || String(r[1]) === lota)).map(r => r[3]);
     if (prices.length) { daily.set(day, mean(prices)); records += prices.length; }
   });
-  if (!daily.size) return noData("Há dados nesta janela, mas nenhum corresponde à combinação de filtros escolhida.");
+  if (!daily.size) return noData(t("santos.nomatch"));
 
   $("santos-wrap").hidden = false; $("santos-vazio").hidden = true;
   const offset = day => Math.round((dateOf(day) - event) / 86400000);
   const pick = (lo, hi) => [...daily].filter(([d]) => { const n = offset(d); return n >= lo && n <= hi; }).map(([, v]) => v);
   const before = pick(-WINDOW_BEFORE, -8), around = pick(-7, 7);
-  setKpi("santos-antes", before.length ? money(mean(before)) : "—", `${before.length} dias com dados`);
-  setKpi("santos-durante", around.length ? money(mean(around)) : "—", `${around.length} dias com dados`);
-  setKpi("santos-registos", String(records), `${daily.size} de ${span} dias com dados`);
+  setKpi("santos-antes", before.length ? money(mean(before)) : "—", t("santos.days", { n: before.length }));
+  setKpi("santos-durante", around.length ? money(mean(around)) : "—", t("santos.days", { n: around.length }));
+  setKpi("santos-registos", String(records), t("santos.days.of", { n: daily.size, span }));
   if (before.length >= 3 && around.length >= 3) {
     const change = mean(around) / mean(before) - 1;
     setKpi("santos-variacao", pct(change, 1),
-      change > 0 ? "Aumento face ao período anterior" : change < 0 ? "Redução face ao período anterior" : "Sem variação entre as médias");
+      change > 0 ? t("santos.up") : change < 0 ? t("santos.down") : t("santos.flat"));
   } else {
-    setKpi("santos-variacao", "—", "São precisos pelo menos 3 dias com dados em cada período");
+    setKpi("santos-variacao", "—", t("santos.need3"));
   }
 
   const labels = [], values = [];
   for (let n = -WINDOW_BEFORE; n <= WINDOW_AFTER; n++) {
     const d = shiftDate(event, n);
-    labels.push(`${n > 0 ? "+" : ""}${n} · ${d.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" })}`);
+    labels.push(`${n > 0 ? "+" : ""}${n} · ${d.toLocaleDateString(I18N.locale, { day: "2-digit", month: "2-digit" })}`);
     values.push(daily.has(isoOf(d)) ? daily.get(isoOf(d)) : null);
   }
   makeChart("santos", "santos-chart", {
     type: "line",
-    data: { labels, datasets: [{ label: "Preço médio", data: values, borderColor: GREEN, backgroundColor: "rgba(43,128,104,.12)",
+    data: { labels, datasets: [{ label: t("santos.series"), data: values, borderColor: GREEN, backgroundColor: "rgba(43,128,104,.12)",
                                   borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, spanGaps: false, tension: .2, fill: true }] },
     options: {
       responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => (c.raw == null ? " Sem registo" : " " + money(c.raw)) } } },
-      scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 12, maxRotation: 0 }, title: { display: true, text: "Dias relativamente à festa (dia 0 = festa)" } },
-                y: { beginAtZero: true, title: { display: true, text: "Preço médio (€)" }, ticks: { callback: v => money(v) } } }
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => (c.raw == null ? " " + t("santos.no.record") : " " + money(c.raw)) } } },
+      scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 12, maxRotation: 0 }, title: { display: true, text: t("santos.x") } },
+                y: { beginAtZero: true, title: { display: true, text: t("santos.y") }, ticks: { callback: v => money(v) } } }
     }
   });
   $("santos-mensagem").textContent =
-    `${records} registos em ${daily.size} dos ${span} dias, entre ${isoOf(start)} e ${isoOf(end)}. Dias sem recolha não são estimados.` +
-    (esp === "" ? " A média de todas as espécies mistura produtos de preços muito diferentes; escolhe uma espécie." :
-     prod === "" ? " A média mistura calibres e frescuras; escolhe um produto para uma comparação mais rigorosa." : "");
+    t("santos.msg", { records, days: daily.size, span, from: isoOf(start), to: isoOf(end) }) +
+    (esp === "" ? t("santos.msg.allspecies") : prod === "" ? t("santos.msg.allproducts") : "");
 }
 
 function selecionarSeparador(which) {
@@ -473,23 +472,51 @@ function selecionarSeparador(which) {
 
 /* ------------------------------------------------------------------- arranque */
 
+/* ------------------------------------------------------------------- idioma */
+
+/** (Re)constrói os filtros com os textos do idioma atual; mantém as seleções existentes. */
+function buildFilters() {
+  fillSelect("day", manifest.days.slice().reverse().map(d => [d.d, `${d.d} · ${tp("n.markets", d.lotas)}`]), null);
+  fillSelect("market", manifest.lotas.map((l, i) => [String(i), l.n]), t("all.markets"));
+  fillSelect("species", speciesList, t("all.species"));
+}
+
+function renderGenerated() {
+  const when = new Date(manifest.generated_at).toLocaleString(I18N.locale, { dateStyle: "long", timeStyle: "short" });
+  $("generated").textContent = t("generated", { when });
+}
+
+/** Chamado quando o utilizador muda de idioma: o texto estático já foi trocado pelo i18n.js. */
+async function onLanguageChange() {
+  if (!manifest) return;
+  buildFilters();
+  renderGenerated();
+  if (lastError) showError(...lastError);
+  if (santosReady) {
+    fillSelect("santos-especie", speciesList, t("all.species"));
+    fillSelect("santos-lota", manifest.lotas.map((l, i) => [String(i), l.n]), t("all.markets"));
+    fillSantosProducts(false);
+  }
+  await renderMain();
+  if (santosReady) renderSantos();
+}
+
+/* ------------------------------------------------------------------- arranque */
+
 async function init() {
   manifest = await getJSON(DATA + "manifest.json");
-  if (!manifest.days.length) throw new Error("não há dias com dados");
-  lotaNames = manifest.lotas.map(l => l.n);
-  itemInfo = manifest.items.map(([esp, t, f]) => {
-    const especie = manifest.species[esp] || esp;
-    const label = especie + (t ? ` T${t}` : "") + (f ? ` ${FRESH[f]}` : "");
-    return { esp, t, f, especie, label, hay: plain(`${especie} t${t}`) };
+  if (!manifest.days.length) throw new Error("no data days");
+  lotaNames = manifest.lotas.map(l => l.n); // nomes das lotas: nunca traduzidos
+  itemInfo = manifest.items.map(([esp, size, fresh]) => {
+    const especie = manifest.species[esp] || esp; // nomes das espécies: nunca traduzidos
+    const label = especie + (size ? ` T${size}` : "") + (fresh ? ` ${FRESH[fresh]}` : "");
+    return { esp, t: size, f: fresh, especie, label, hay: plain(`${especie} t${size}`) };
   });
   speciesList = Object.entries(manifest.species).sort((a, b) => a[1].localeCompare(b[1], "pt-PT"));
 
-  const days = manifest.days.map(d => d.d).reverse();
-  fillSelect("day", manifest.days.slice().reverse().map(d => [d.d, `${d.d} · ${d.lotas} ${d.lotas === 1 ? "lota" : "lotas"}`]), null);
-  $("day").value = days[0];
-  fillSelect("market", manifest.lotas.map((l, i) => [String(i), l.n]), "Todas as lotas");
-  fillSelect("species", speciesList, "Todas as espécies");
-  $("generated").textContent = "Dados atualizados a " + new Date(manifest.generated_at).toLocaleString("pt-PT", { dateStyle: "long", timeStyle: "short" }) + ".";
+  buildFilters();
+  $("day").value = manifest.days[manifest.days.length - 1].d;
+  renderGenerated();
 
   ["day", "market", "species", "search"].forEach(id =>
     $(id).addEventListener(id === "search" ? "input" : "change", () => { currentPage = 1; renderMain(); }));
@@ -511,13 +538,12 @@ async function init() {
 
   Chart.defaults.color = "#61716b";
   Chart.defaults.borderColor = "#e3ebe7";
+  I18N.onChange(onLanguageChange);
   await renderMain();
 }
 
 init().catch(err => {
   console.error(err);
-  showError(location.protocol === "file:"
-    ? "Este site não funciona se abrires o index.html diretamente (file://). Dentro da pasta site, corre `python -m http.server 8000` e abre http://localhost:8000."
-    : "Não foi possível carregar os dados. Corre `python build_json.py` e confirma que site/data/manifest.json existe. (" + err.message + ")");
+  showError(location.protocol === "file:" ? "err.file" : "err.load", { msg: err.message });
   $("status").textContent = "";
 });

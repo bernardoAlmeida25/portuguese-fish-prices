@@ -43,235 +43,243 @@
 <body>
   <main>
     <header>
-      <h1>Preços de Pescado em Portugal</h1>
-      <p>
+      <h1 data-i18n="hero.title">Preços de Pescado em Portugal</h1>
+      <p data-i18n="hero.text">
         Consulta o histórico de preços médios da primeira venda nas lotas
         portuguesas da Docapesca. Compara preços por data, lota, espécie,
         calibre e frescura, e explora tendências e variações sazonais.
       </p>
     </header>
 
-    <nav class="tabs" role="tablist" aria-label="Secções do site">
-      <button class="tab-button" id="tab-diario" role="tab" aria-selected="true" aria-controls="panel-diario" type="button">Preços e gráficos</button>
-      <button class="tab-button" id="tab-sazonalidade" role="tab" aria-selected="false" aria-controls="panel-sazonalidade" type="button">Santos Populares</button>
-    </nav>
+    <div class="tabs-row">
+      <nav class="tabs" role="tablist" aria-label="Secções do site" data-i18n-attr="aria-label:tabs.aria">
+        <button class="tab-button" id="tab-diario" role="tab" aria-selected="true" aria-controls="panel-diario" type="button" data-i18n="tabs.prices">Preços e gráficos</button>
+        <button class="tab-button" id="tab-sazonalidade" role="tab" aria-selected="false" aria-controls="panel-sazonalidade" type="button" data-i18n="tabs.santos">Santos Populares</button>
+      </nav>
+
+      <!-- Idioma: PT / EN (nomes de espécies e de lotas não são traduzidos) -->
+      <div class="lang-switch" role="group" aria-label="Idioma / Language" data-i18n-attr="aria-label:lang.group">
+        <button type="button" data-lang-btn="pt" lang="pt" aria-pressed="true" title="Português">PT</button>
+        <button type="button" data-lang-btn="en" lang="en" aria-pressed="false" title="English">EN</button>
+      </div>
+    </div>
 
     <p class="load-error" id="load-error" hidden></p>
 
     <!-- Preços e gráficos -->
     <div id="panel-diario" role="tabpanel" aria-labelledby="tab-diario">
-      <section class="filters" aria-label="Filtros de preços">
+      <section class="filters" aria-label="Filtros de preços" data-i18n-attr="aria-label:filters.aria">
         <div>
-          <label for="day">Data</label>
-          <select id="day"><option value="">A carregar datas…</option></select>
+          <label for="day" data-i18n="f.day">Data</label>
+          <select id="day"><option value="" data-i18n="loading.days">A carregar datas…</option></select>
         </div>
         <div>
-          <label for="market">Lota</label>
-          <select id="market"><option value="">A carregar lotas…</option></select>
+          <label for="market" data-i18n="f.market">Lota</label>
+          <select id="market"><option value="" data-i18n="loading.markets">A carregar lotas…</option></select>
         </div>
         <div>
-          <label for="species">Espécie</label>
-          <select id="species"><option value="">A carregar espécies…</option></select>
+          <label for="species" data-i18n="f.species">Espécie</label>
+          <select id="species"><option value="" data-i18n="loading.species">A carregar espécies…</option></select>
         </div>
         <div>
-          <label for="search">Pesquisar</label>
-          <input id="search" type="search" placeholder="Espécie, lota ou calibre (ex.: T2)">
+          <label for="search" data-i18n="f.search">Pesquisar</label>
+          <input id="search" type="search" placeholder="Espécie, lota ou calibre (ex.: T2)" data-i18n-attr="placeholder:f.search.ph">
         </div>
       </section>
 
       <p class="coverage" id="coverage" role="status"></p>
 
-      <section class="stats" aria-label="Resumo dos preços">
+      <section class="stats" aria-label="Resumo dos preços" data-i18n-attr="aria-label:stats.aria">
         <article class="stat">
-          <span class="stat-label">Preço mediano</span>
+          <span class="stat-label" data-i18n="stat.median">Preço mediano</span>
           <strong class="stat-value" id="avg">—</strong>
-          <span class="stat-detail">Mediana dos registos filtrados</span>
+          <span class="stat-detail" data-i18n="stat.median.d">Mediana dos registos filtrados</span>
         </article>
         <article class="stat">
-          <span class="stat-label">Registos</span>
+          <span class="stat-label" data-i18n="stat.records">Registos</span>
           <strong class="stat-value" id="count">—</strong>
-          <span class="stat-detail" id="countDetail">Após aplicar os filtros</span>
+          <span class="stat-detail" id="countDetail" data-i18n="stat.records.d">Após aplicar os filtros</span>
         </article>
         <article class="stat">
-          <span class="stat-label">Preço mais alto</span>
+          <span class="stat-label" data-i18n="stat.max">Preço mais alto</span>
           <strong class="stat-value" id="max">—</strong>
           <span class="stat-detail" id="maxName">—</span>
         </article>
         <article class="stat">
-          <span class="stat-label">Lotas</span>
+          <span class="stat-label" data-i18n="stat.markets">Lotas</span>
           <strong class="stat-value" id="marketsCount">—</strong>
-          <span class="stat-detail">Com registos nos filtros atuais</span>
+          <span class="stat-detail" data-i18n="stat.markets.d">Com registos nos filtros atuais</span>
         </article>
       </section>
 
-      <section class="charts" aria-label="Análise e comparação de preços">
+      <section class="charts" aria-label="Análise e comparação de preços" data-i18n-attr="aria-label:charts.aria">
         <article class="panel">
-          <h2>10 produtos mais caros</h2>
-          <p class="note">Um produto é uma espécie com um calibre (T) e uma frescura (E, A ou B). Mostra a mediana entre as lotas.</p>
-          <div class="chart-wrap"><canvas id="topChart" role="img" aria-label="Os 10 produtos com preço mais alto"></canvas></div>
+          <h2 data-i18n="top.h">10 produtos mais caros</h2>
+          <p class="note" data-i18n="top.note">Um produto é uma espécie com um calibre (T) e uma frescura (E, A ou B). Mostra a mediana entre as lotas.</p>
+          <div class="chart-wrap"><canvas id="topChart" role="img" aria-label="Os 10 produtos com preço mais alto" data-i18n-attr="aria-label:top.aria"></canvas></div>
           <p class="chart-msg" id="topMsg" hidden></p>
         </article>
 
         <article class="panel">
-          <h2>Que lotas vendem mais caro ou mais barato?</h2>
-          <p class="note">Diferença face ao preço mediano de cada produto, só para produtos vendidos em duas ou mais lotas. Ignora o filtro de lota.</p>
-          <div class="chart-wrap"><canvas id="lotaChart" role="img" aria-label="Diferença de preço de cada lota face à mediana"></canvas></div>
+          <h2 data-i18n="lota.h">Que lotas vendem mais caro ou mais barato?</h2>
+          <p class="note" data-i18n="lota.note">Diferença face ao preço mediano de cada produto, só para produtos vendidos em duas ou mais lotas. Ignora o filtro de lota.</p>
+          <div class="chart-wrap"><canvas id="lotaChart" role="img" aria-label="Diferença de preço de cada lota face à mediana" data-i18n-attr="aria-label:lota.aria"></canvas></div>
           <p class="chart-msg" id="lotaMsg" hidden></p>
         </article>
 
         <article class="panel">
-          <h2>Quanto vale a frescura?</h2>
-          <p class="note">Preço de cada frescura face à categoria A, na mesma lota, espécie e calibre.</p>
-          <div class="chart-wrap short"><canvas id="freshChart" role="img" aria-label="Diferença de preço entre frescuras E, A e B"></canvas></div>
+          <h2 data-i18n="fresh.h">Quanto vale a frescura?</h2>
+          <p class="note" data-i18n="fresh.note">Preço de cada frescura face à categoria A, na mesma lota, espécie e calibre.</p>
+          <div class="chart-wrap short"><canvas id="freshChart" role="img" aria-label="Diferença de preço entre frescuras E, A e B" data-i18n-attr="aria-label:fresh.aria"></canvas></div>
           <p class="chart-msg" id="freshMsg" hidden></p>
         </article>
 
         <article class="panel">
-          <h2>Quanto vale o calibre?</h2>
-          <p class="note">Preço de cada calibre face ao T1, na mesma lota, espécie e frescura.</p>
-          <div class="chart-wrap short"><canvas id="sizeChart" role="img" aria-label="Diferença de preço entre calibres face ao T1"></canvas></div>
+          <h2 data-i18n="size.h">Quanto vale o calibre?</h2>
+          <p class="note" data-i18n="size.note">Preço de cada calibre face ao T1, na mesma lota, espécie e frescura.</p>
+          <div class="chart-wrap short"><canvas id="sizeChart" role="img" aria-label="Diferença de preço entre calibres face ao T1" data-i18n-attr="aria-label:size.aria"></canvas></div>
           <p class="chart-msg" id="sizeMsg" hidden></p>
         </article>
       </section>
 
       <section class="panel trend-panel">
-        <h2>Evolução do preço</h2>
-        <p class="note" id="trendNote">Escolhe uma espécie nos filtros para ver como mudaram os preços dos seus produtos nos últimos 90 dias.</p>
-        <div class="chart-wrap" id="trendWrap" hidden><canvas id="trendChart" role="img" aria-label="Evolução do preço dos produtos da espécie escolhida"></canvas></div>
+        <h2 data-i18n="trend.h">Evolução do preço</h2>
+        <p class="note" id="trendNote" data-i18n="trend.pick">Escolhe uma espécie nos filtros para ver como mudaram os preços dos seus produtos nos últimos 90 dias.</p>
+        <div class="chart-wrap" id="trendWrap" hidden><canvas id="trendChart" role="img" aria-label="Evolução do preço dos produtos da espécie escolhida" data-i18n-attr="aria-label:trend.aria"></canvas></div>
       </section>
 
       <section class="panel">
         <div class="table-top">
-          <h2 style="margin:0">Registos de preços</h2>
-          <span class="pill" id="datePill">A carregar…</span>
+          <h2 style="margin:0" data-i18n="table.h">Registos de preços</h2>
+          <span class="pill" id="datePill" data-i18n="loading">A carregar…</span>
         </div>
 
         <div class="table-scroll">
           <table>
             <thead>
               <tr>
-                <th>Lota</th>
-                <th>Espécie</th>
-                <th>Calibre</th>
-                <th>Frescura</th>
-                <th>Preço médio</th>
+                <th data-i18n="th.market">Lota</th>
+                <th data-i18n="th.species">Espécie</th>
+                <th data-i18n="th.size">Calibre</th>
+                <th data-i18n="th.fresh">Frescura</th>
+                <th data-i18n="th.price">Preço médio</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
 
-        <div id="empty" hidden>Não foram encontrados registos para os filtros selecionados.</div>
+        <div id="empty" hidden data-i18n="table.empty">Não foram encontrados registos para os filtros selecionados.</div>
 
-        <div class="pagination" aria-label="Paginação da tabela">
-          <label for="pageSize">Registos por página</label>
+        <div class="pagination" aria-label="Paginação da tabela" data-i18n-attr="aria-label:page.aria">
+          <label for="pageSize" data-i18n="page.size">Registos por página</label>
           <select id="pageSize">
             <option value="10" selected>10</option>
             <option value="25">25</option>
             <option value="50">50</option>
             <option value="100">100</option>
           </select>
-          <button id="prevPage" type="button" disabled>Anterior</button>
+          <button id="prevPage" type="button" disabled data-i18n="page.prev">Anterior</button>
           <span id="pageInfo">Página 1 de 1</span>
-          <button id="nextPage" type="button" disabled>Seguinte</button>
+          <button id="nextPage" type="button" disabled data-i18n="page.next">Seguinte</button>
         </div>
 
-        <p id="status" role="status">A carregar os dados…</p>
+        <p id="status" role="status" data-i18n="loading.data">A carregar os dados…</p>
       </section>
     </div>
 
     <!-- Santos Populares -->
     <section id="panel-sazonalidade" role="tabpanel" aria-labelledby="tab-sazonalidade" hidden>
-      <h2>Análise sazonal dos preços durante os Santos Populares</h2>
-      <p class="seasonal-intro">
+      <h2 data-i18n="santos.h">Análise sazonal dos preços durante os Santos Populares</h2>
+      <p class="seasonal-intro" data-i18n="santos.intro">
         Compara os preços nos 30 dias anteriores e nos 15 dias posteriores
         a Santo António, São João ou São Pedro. São usados apenas registos
         reais; dias sem recolha não são estimados.
       </p>
 
-      <section class="filters seasonal-filters" aria-label="Filtros de sazonalidade">
+      <section class="filters seasonal-filters" aria-label="Filtros de sazonalidade" data-i18n-attr="aria-label:santos.filters.aria">
         <div>
-          <label for="santos-festa">Festa</label>
+          <label for="santos-festa" data-i18n="sf.festa">Festa</label>
           <select id="santos-festa">
-            <option value="santo-antonio">Santo António · 13 jun</option>
-            <option value="sao-joao">São João · 24 jun</option>
-            <option value="sao-pedro">São Pedro · 29 jun</option>
+            <option value="santo-antonio" data-i18n="festa.antonio">Santo António · 13 jun</option>
+            <option value="sao-joao" data-i18n="festa.joao">São João · 24 jun</option>
+            <option value="sao-pedro" data-i18n="festa.pedro">São Pedro · 29 jun</option>
           </select>
         </div>
         <div>
-          <label for="santos-ano">Ano</label>
+          <label for="santos-ano" data-i18n="sf.year">Ano</label>
           <select id="santos-ano"></select>
         </div>
         <div>
-          <label for="santos-especie">Espécie</label>
+          <label for="santos-especie" data-i18n="sf.species">Espécie</label>
           <select id="santos-especie"></select>
         </div>
         <div>
-          <label for="santos-produto">Produto</label>
+          <label for="santos-produto" data-i18n="sf.product">Produto</label>
           <select id="santos-produto"></select>
         </div>
         <div>
-          <label for="santos-lota">Lota</label>
+          <label for="santos-lota" data-i18n="sf.market">Lota</label>
           <select id="santos-lota"></select>
         </div>
       </section>
 
-      <section class="stats seasonal-stats" aria-label="Resumo da festa">
+      <section class="stats seasonal-stats" aria-label="Resumo da festa" data-i18n-attr="aria-label:santos.stats.aria">
         <article class="stat">
-          <span class="stat-label">Antes · -30 a -8 dias</span>
+          <span class="stat-label" data-i18n="ss.before">Antes · -30 a -8 dias</span>
           <strong class="stat-value" id="santos-antes">—</strong>
           <span class="stat-detail" id="santos-antes-detalhe">&nbsp;</span>
         </article>
         <article class="stat">
-          <span class="stat-label">Em torno · -7 a +7 dias</span>
+          <span class="stat-label" data-i18n="ss.around">Em torno · -7 a +7 dias</span>
           <strong class="stat-value" id="santos-durante">—</strong>
           <span class="stat-detail" id="santos-durante-detalhe">&nbsp;</span>
         </article>
         <article class="stat">
-          <span class="stat-label">Variação entre períodos</span>
+          <span class="stat-label" data-i18n="ss.change">Variação entre períodos</span>
           <strong class="stat-value" id="santos-variacao">—</strong>
-          <span class="stat-detail" id="santos-variacao-detalhe">Dados insuficientes para comparar</span>
+          <span class="stat-detail" id="santos-variacao-detalhe" data-i18n="santos.insufficient">Dados insuficientes para comparar</span>
         </article>
         <article class="stat">
-          <span class="stat-label">Registos no período</span>
+          <span class="stat-label" data-i18n="ss.records">Registos no período</span>
           <strong class="stat-value" id="santos-registos">—</strong>
           <span class="stat-detail" id="santos-registos-detalhe">&nbsp;</span>
         </article>
       </section>
 
       <section class="panel seasonal-panel">
-        <h2>Evolução do preço médio em torno da festa</h2>
-        <p>
+        <h2 data-i18n="santos.chart.h">Evolução do preço médio em torno da festa</h2>
+        <p data-i18n="santos.chart.p">
           O dia 0 é o dia da festa. Dias sem recolha ficam sem valor — não
           são tratados como preços de zero euros. Para evitar efeitos de
           mistura de calibres, escolhe um produto concreto.
         </p>
         <div class="chart-wrap seasonal-chart-wrap" id="santos-wrap">
-          <canvas id="santos-chart" role="img" aria-label="Preço médio por dia em torno da festa"></canvas>
+          <canvas id="santos-chart" role="img" aria-label="Preço médio por dia em torno da festa" data-i18n-attr="aria-label:santos.chart.aria"></canvas>
         </div>
         <p class="empty-state" id="santos-vazio" hidden></p>
-        <p id="santos-mensagem" role="status">A carregar dados…</p>
+        <p id="santos-mensagem" role="status" data-i18n="loading.santos">A carregar dados…</p>
       </section>
     </section>
   </main>
 
   <footer>
-    <section aria-label="Fonte e metodologia">
-      <h2>Fonte dos dados e metodologia</h2>
-      <p>
+    <section aria-label="Fonte e metodologia" data-i18n-attr="aria-label:foot.aria">
+      <h2 data-i18n="foot.h">Fonte dos dados e metodologia</h2>
+      <p data-i18n-html="foot.p1">
         Fonte: <a href="https://www.docapesca.pt/pt/estatisticas" target="_blank" rel="noopener noreferrer">Docapesca — Estatísticas diárias</a>.
         Os valores representam preços médios em euros, tal como publicados.
         A tabela de origem não indica explicitamente a unidade dos preços;
         por isso, não se assume que correspondam a euros por quilograma.
       </p>
-      <p>
+      <p data-i18n="foot.p2">
         As letras E, A e B correspondem ao campo de frescura dos dados (1, 2 e 3)
         e coincidem em todos os registos com a letra do nome do produto.
         O calibre T vem do próprio nome (T1, T2, …). Nos dias em que só algumas
         lotas foram recolhidas, as comparações entre lotas usam apenas as que
         têm dados disponíveis.
       </p>
-      <p>
+      <p data-i18n="foot.p3">
         Os gráficos e as comparações dependem dos registos disponíveis para
         cada data e filtro. Dias sem dados não são estimados.
       </p>
@@ -280,6 +288,7 @@
   </footer>
 
   <script src="vendor/chart.umd.js"></script>
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

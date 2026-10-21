@@ -63,3 +63,12 @@ footer a { color:var(--green); }
 .empty-state { padding: 28px 16px; text-align: center; border: 1px dashed var(--line); border-radius: 10px; background: #fbfdfc; }
 footer p { margin: 0 0 6px; color: var(--muted); font-size: 12px; }
 @media (min-width: 801px) { .seasonal-filters { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* ---------- seletor de idioma (PT / EN) ---------- */
+.tabs-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 16px; }
+.tabs-row .tabs { margin: 0; }
+.lang-switch { display: inline-flex; border: 1px solid #cbd8d1; border-radius: 8px; overflow: hidden; background: white; }
+.lang-switch button { border: 0; border-radius: 0; padding: 8px 14px; background: transparent; font-weight: 650; letter-spacing: .02em; }
+.lang-switch button + button { border-left: 1px solid #cbd8d1; }
+.lang-switch button[aria-pressed="true"] { background: var(--green); color: white; }
+.lang-switch button:hover:not([aria-pressed="true"]) { background: #f1f6f3; }
